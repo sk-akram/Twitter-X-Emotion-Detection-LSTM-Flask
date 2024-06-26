@@ -1,0 +1,25 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Background Screen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <img src="https://images.unsplash.com/photo-1690278504680-83e2c72704b1?crop=entropy&cs=srgb&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3MTU1ODE0Njl8&ixlib=rb-4.0.3&q=85" alt="Photo">
+            <p class="username">Enter Username</p>
+            <p class="description">See the magic happening</p>
+            <form action="{{ url_for('result') }}" method="post">
+                <div class="input-container">
+                    <input type="text" name="username" placeholder="@elonmusk">
+                </div>
+                <button type="submit">Let's Begin!</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

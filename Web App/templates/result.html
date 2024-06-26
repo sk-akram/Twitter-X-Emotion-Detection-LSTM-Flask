@@ -1,0 +1,215 @@
+<!-- result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .section {
+            color: white; /* White text color */
+            height: 100vh;
+        }
+        .section-2 {
+            background-color: #121111; /* Dark grey background color */
+            padding: 20px; /* Added padding */
+        }
+        .section-3 {
+            background-color: #121111; /* Dark grey background color */
+            padding: 20px; /* Added padding */
+        }
+        .border {
+            border-left: 2px solid #595959;
+            height: 100%;
+        }
+
+        .section-1 {
+            background-color: #000000; /* Dark grey background color */
+            color: white; /* White text color */
+            padding: 20px; /* Added padding */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+        }
+
+        .profile-pic-container {
+            margin-bottom: 10px; /* Added margin for spacing */
+        }
+        .profile-pic {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background-color: white; /* You can set any background color */
+            margin-bottom: 20px;
+            border: 2px solid #595959; /* Add border */
+            margin: 10px;
+        }
+        
+
+    
+        .name {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
+
+        }
+        .stats {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: white;
+            color: black;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+
+        .section-2 {
+            background-color: #121111; /* Dark grey background color */
+            padding: 20px; /* Added padding */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Align content to the left */
+            text-align: left; /* Align text to the left */
+        }
+        .chart {
+            margin: 5px;
+            margin-top: 50px;
+            width: 350px;
+            font-family: Arial, sans-serif;
+        }
+        .bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .label {
+            width: 55px;
+            text-align: left;
+            margin-right: 10px;
+        }
+        .bar-fill {
+            flex: 1;
+            background-color: #000000;
+            height: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            
+        }
+        .bar-fill div {
+            background-color: rgb(255, 255, 255);
+            height: 100%;
+            border-radius: 5px;
+        }
+        .emoji {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section section-1" style="width: 30%;">
+            <!-- Profile Picture -->
+            <div class="profile-pic-container">
+                <!-- Profile Picture -->
+                <img class="profile-pic" src="{{ data.user_pic }}" alt="Profile Picture">
+            </div>
+            <!-- Name -->
+            <div class="name">{{ data.Name }}</div>
+            <!-- Followers and Following -->
+            <div class="stats">{{ data.Following | format_number }} Following | {{ data.Followers | format_number }} Followers</div>
+            <!-- Detect Emotions Button -->
+            <button id="detect-emotions" class="button">Detect Emotions</button>
+        </div>
+        <div class="section section-2" style="width: 30%;">
+            <h2>Top 6 emotions:</h2>
+            <!-- Horizontal Bar Chart -->
+            <div class="chart" id="emotion-results">
+                <!-- Emotions will be dynamically added here -->
+            </div>
+        </div>
+        <div class="border"></div> <!-- Border between section 2 and section 3 -->
+        <div class="section section-3" style="width: 38%;">
+            <h2>Most Frequent Keywords in Posts:</h2>
+            <!-- Content for section 3 goes here -->
+            <div id="wordcloud-container"></div>
+        </div>
+    </div>
+
+    <!-- Add jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+    var emoDict = {
+    0:'Sadness',
+    1:'Joy',
+    2:'Fear',
+    3:'Anger',
+    4:'Love',
+    5:'Surprise'
+}
+$(document).ready(function() {
+    $('#detect-emotions').click(function() {
+        var username = '{{ data.Username }}';  // Get the username from the data attribute
+        $.ajax({
+            type: 'POST',
+            url: '/detect_emotions',
+            data: { username: username },  // Send the username directly
+            success: function(data) {
+                // Update the emotions in the frontend
+                $('#emotion-results').empty();
+                Object.keys(data.emotion_percentages).forEach(function(emotion) {
+                    var percentage = data.emotion_percentages[emotion] || 0; // Set percentage to 0 if not present in data
+                    var barWidth = percentage * 3.5; // Adjust for proper visualization
+                    
+                    $('#emotion-results').append('<div class="bar">' +
+                        '<span class="label">' + emoDict[emotion] + ':</span>' +
+                        '<div class="bar-fill" style="width: ' + barWidth + 'px;">' +
+                        '<div style="width: ' + barWidth + 'px;"></div>' +
+                        '<span class="emoji">' + getEmoji(emotion) + '</span> ' + percentage.toFixed(2) + '%' +
+                        '</div>' +
+                        '</div>');
+                });
+                $('#wordcloud-container').empty();
+                $('#wordcloud-container').append('<img src="data:image/png;base64,' + data.wordcloud + '" alt="Word Cloud">');
+            }
+        });
+    });
+});
+
+// Function to get emoji for each emotion (you can customize this)
+function getEmoji(emotion) {
+    switch(emotion) {
+        case '1':
+            return '😂';
+        case '3':
+            return '😠';
+        case '4':
+            return '🥰';
+        case '2':
+            return '😱';
+        case '0':
+            return '😔';
+        case '5':
+            return '😲';
+        default:
+            return '?';
+    }
+}
+
+    </script>
+    
+</body>
+</html>
